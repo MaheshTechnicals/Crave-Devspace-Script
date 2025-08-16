@@ -1,43 +1,60 @@
 #!/bin/bash
-set -e  # exit immediately on error
 
-# Step 1: Clean local manifests (don't remove build/)
-rm -rf .repo/local_manifests
+# Exit immediately on error
+set -e
+
+# Step 1: Clean local manifests
+rm -rf .repo/local_manifests/
+echo "==========================="
+echo " Local manifests cleaned ✅"
+echo "==========================="
 
 # Step 2: Initialize repo
 repo init -u https://github.com/Lunaris-AOSP/android -b 16 --git-lfs
+echo "=================="
+echo " Repo init success ✅"
+echo "=================="
 
 # Step 3: Clone local manifests
 git clone -b lunaris https://github.com/MaheshTechnicals/local_manifests_miatoll .repo/local_manifests
+echo "============================"
+echo " Local manifests cloned ✅"
+echo "============================"
 
-# Step 4: Sync sources (loop until build/envsetup.sh exists)
-MAX_RETRIES=3
-for i in $(seq 1 $MAX_RETRIES); do
-    echo ">>> Repo sync attempt $i of $MAX_RETRIES..."
-    /opt/crave/resync.sh || true
+# Step 4: Sync sources
+/opt/crave/resync.sh
+echo "============="
+echo " Repo sync success ✅"
+echo "============="
 
-    if [ -f build/envsetup.sh ]; then
-        echo ">>> build/envsetup.sh found! Proceeding..."
-        break
-    fi
+# Step 5: Export build info
+export BUILD_USERNAME=mahesh
+export BUILD_HOSTNAME=crave
+echo "======================"
+echo " Export vars done ✅"
+echo "======================"
 
-    if [ "$i" -eq "$MAX_RETRIES" ]; then
-        echo "❌ build/envsetup.sh not found after $MAX_RETRIES attempts. Exiting."
-        exit 1
-    fi
-
-    echo "⚠️ build/envsetup.sh missing, retrying sync..."
-    sleep 5
-done
-
-# Step 5: Setup build environment
+# Step 6: Setup build environment
 source build/envsetup.sh
+echo "====================="
+echo " Envsetup success ✅"
+echo "====================="
 
-# Step 6: Lunch target
+# Step 7: Lunch target
 lunch lineage_miatoll-bp2a-user
+echo "====================="
+echo " Lunch target set ✅"
+echo "====================="
 
-# Step 7: Clean intermediates
+# Step 8: Clean intermediates
 make installclean
+echo "====================="
+echo " Installclean done ✅"
+echo "====================="
 
-# Step 8: Start build
+# Step 9: Start build
 m lunaris
+echo "====================="
+echo " Build started 🚀"
+echo "====================="
+
